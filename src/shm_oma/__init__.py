@@ -5,16 +5,17 @@ This library provides tools for modal parameter identification using Stochastic
 Subspace Identification with Covariance (SSI-COV) and automated frequency tracking
 over time using clustering and Modal Assurance Criterion (MAC).
 
-Main Components:
-- ssicov: Core SSI-COV algorithm implementation
-- automation: Automated pole filtering and clustering
-- tracking: Frequency tracking and time-series analysis
+Main Components
+---------------
+ssicov      Core SSI-COV algorithm with Hard Criteria filtering.
+automation  Automated pole filtering and clustering (DBSCAN / hierarchical).
+tracking    Frequency tracking and time-series analysis for continuous SHM.
 """
 
-__version__ = "0.1.0"
-__author__ = "Adil Poshad khan"
+__version__ = "0.2.0"
+__author__ = "Adil Poshad Khan"
 
-# Import main public API
+# Core SSI-COV
 from .ssicov import (
     perform_ssi_cov,
     compute_autocorrelation,
@@ -26,6 +27,7 @@ from .ssicov import (
     plot_singular_values,
 )
 
+# Automation & clustering
 from .automation import (
     automate_poles_dbscan,
     automate_poles_hierarchical,
@@ -34,14 +36,14 @@ from .automation import (
     vectorized_mac,
 )
 
+# Tracking
 from .tracking import (
     FrequencyTracker,
     ModalTrackingAnalyzer,
 )
 
-# Define public API
 __all__ = [
-    # SSI-COV functions
+    # SSI-COV
     "perform_ssi_cov",
     "compute_autocorrelation",
     "build_toeplitz_matrix",
@@ -50,15 +52,13 @@ __all__ = [
     "plot_stabilization_diagram",
     "plot_psd_with_peaks",
     "plot_singular_values",
-    
-    # Automation functions
+    # Automation
     "automate_poles_dbscan",
     "automate_poles_hierarchical",
     "filter_spurious_poles",
     "mac",
     "vectorized_mac",
-    
-    # Tracking classes
+    # Tracking
     "FrequencyTracker",
     "ModalTrackingAnalyzer",
 ]
