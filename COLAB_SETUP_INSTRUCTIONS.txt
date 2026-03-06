@@ -1,0 +1,182 @@
+================================================================================
+GOOGLE COLAB SETUP FOR SHM_OMA - COMPLETE INSTRUCTIONS
+================================================================================
+
+There are 3 ways to use shm_oma in Google Colab:
+
+================================================================================
+METHOD 1: INSTALL FROM GITHUB (Easiest - Recommended)
+================================================================================
+
+Requirements: Your code must be in a public GitHub repository
+
+Step 1: Push shm_oma to GitHub
+  - Create a GitHub account or use existing
+  - Create a new repository (public)
+  - Push your shm_oma code there
+  - Note the repo URL: https://github.com/yourusername/shm_oma
+
+Step 2: In Colab, run ONE cell:
+
+!pip install git+https://github.com/yourusername/shm_oma.git
+
+Step 3: Use it:
+
+from shm_oma import perform_ssi_cov
+frequencies, damping, modes = perform_ssi_cov(your_data, order=30)
+
+================================================================================
+METHOD 2: UPLOAD FILES DIRECTLY (No GitHub needed)
+================================================================================
+
+Step 1: In Colab cell 1:
+
+!mkdir -p /content/shm_oma
+from google.colab import files
+uploaded = files.upload()
+
+Step 2: Move files to the right place:
+
+!unzip "*.zip" -d /content/shm_oma 2>/dev/null || true
+!ls -la /content/shm_oma/
+
+Step 3: Install as local package:
+
+!cd /content/shm_oma && pip install -e .
+
+Step 4: Import and use:
+
+from shm_oma import perform_ssi_cov
+
+================================================================================
+METHOD 3: INSTALL DEPENDENCIES + COPY CODE (Most Basic)
+================================================================================
+
+For minimal setup, just copy the shm_oma functions directly:
+
+# Cell 1: Install deps
+!pip install numpy scipy scikit-learn
+
+# Cell 2: Copy & paste the SSI-COV code from src/shm_oma/ssicov.py directly
+
+# Cell 3: Use it
+frequencies, damping, modes = perform_ssi_cov(data, order=30)
+
+================================================================================
+QUICK START (COPY & PASTE)
+================================================================================
+
+OPTION A - Already have GitHub repo:
+  !pip install git+https://github.com/YOURNAME/shm_oma.git
+  
+OPTION B - Want to just test quickly:
+  !pip install numpy scipy scikit-learn
+  # Then manually copy functions OR use METHOD 3
+
+OPTION C - Use sample data:
+  import numpy as np
+  from shm_oma import perform_ssi_cov
+  
+  data = np.random.randn(5000, 3)
+  freqs, damps, modes = perform_ssi_cov(data, order=30)
+  
+  print(f"Found {len(freqs)} modes")
+
+================================================================================
+UPLOADING YOUR DATA IN COLAB
+================================================================================
+
+Option 1: Upload CSV file:
+  from google.colab import files
+  import pandas as pd
+  
+  uploaded = files.upload()
+  df = pd.read_csv(list(uploaded.keys())[0])
+  data = df.select_dtypes(include=[np.number]).values
+
+Option 2: Use Google Drive:
+  from google.colab import drive
+  drive.mount('/content/drive')
+  
+  import pandas as pd
+  df = pd.read_csv('/content/drive/MyDrive/data.csv')
+  data = df.select_dtypes(include=[np.number]).values
+
+Option 3: Download from URL:
+  import pandas as pd
+  df = pd.read_csv('https://example.com/data.csv')
+  data = df.select_dtypes(include=[np.number]).values
+
+================================================================================
+DOWNLOADING RESULTS FROM COLAB
+================================================================================
+
+Save and download results:
+  from google.colab import files
+  
+  # Save CSV
+  results_df.to_csv('results.csv')
+  
+  # Download
+  files.download('results.csv')
+
+================================================================================
+EXAMPLE: COMPLETE COLAB NOTEBOOK
+================================================================================
+
+# Cell 1: Install
+!pip install git+https://github.com/yourusername/shm_oma.git
+
+# Cell 2: Import
+from shm_oma import perform_ssi_cov
+from google.colab import files
+import pandas as pd
+import numpy as np
+
+# Cell 3: Upload data
+uploaded = files.upload()
+df = pd.read_csv(list(uploaded.keys())[0])
+data = df.select_dtypes(include=[np.number]).values
+
+# Cell 4: Analyze
+frequencies, damping, modes = perform_ssi_cov(data, order=30)
+
+# Cell 5: Show results
+for i, (f, d) in enumerate(zip(frequencies[:5], damping[:5])):
+    print(f"Mode {i+1}: {f:.2f} Hz, Damping: {d:.6f}")
+
+# Cell 6: Download results
+results = pd.DataFrame({'Frequency': frequencies, 'Damping': damping})
+results.to_csv('results.csv', index=False)
+files.download('results.csv')
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "ImportError: No module named shm_oma"
+Solution: Run the installation cell first: 
+  !pip install git+https://github.com/yourusername/shm_oma.git
+
+Problem: "ModuleNotFoundError: No module named 'numpy'"
+Solution: Install dependencies:
+  !pip install numpy scipy scikit-learn
+
+Problem: "File not found" when uploading
+Solution: Use absolute path or Google Drive:
+  from google.colab import drive
+  drive.mount('/content/drive')
+
+Problem: "Out of memory"
+Solution: Use randomized SVD or reduce data size:
+  perform_ssi_cov(data[:5000], order=20, use_randomized_svd=True)
+
+================================================================================
+NEED HELP?
+================================================================================
+
+1. Check the examples in: colab_simple.py
+2. Read: GOOGLE_COLAB_GUIDE.md
+3. Review: GOOGLE_COLAB_TUTORIAL.py
+
+Ready? Open https://colab.research.google.com and get started!

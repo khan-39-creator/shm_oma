@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shm_oma"
+version = "0.1.0"
+description = "Automated SSI-COV and frequency tracking for Structural Health Monitoring."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Adil Poshad khan" }
+]
+dependencies = [
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "black",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
