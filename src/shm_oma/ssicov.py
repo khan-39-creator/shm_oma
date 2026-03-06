@@ -55,6 +55,7 @@ def compute_autocorrelation(acceleration_data, max_lag=None, detrend=True):
     n_samples, n_sensors = acceleration_data.shape
     if max_lag is None:
         max_lag = n_samples // 2
+    max_lag = min(max_lag, n_samples - 1)  # cannot exceed data length
 
     acf = np.zeros((max_lag, n_sensors, n_sensors))
 
@@ -229,7 +230,10 @@ def perform_ssi_cov(
     acf = compute_autocorrelation(acceleration_data, max_lag=max_lag, detrend=True)
 
     # Step 2: Block-Toeplitz matrix
-    block_rows = max(order // n_sensors + 1, 2)
+    # block_rows must be large enough so that block_rows * n_sensors >> 2 * order
+    # Following pyOMA2 / MATLAB SSI-COV conventions: br >= 2 * order_max / n_sensors
+    block_rows = max(2 * order // n_sensors + 1, order, 20)
+    block_rows = min(block_rows, max_lag - 1)  # cannot exceed available lags
     H = build_toeplitz_matrix(acf, block_rows)
 
     # Step 3: SVD
@@ -248,14 +252,16 @@ def perform_ssi_cov(
     Sigma_sqrt = np.diag(np.sqrt(s_trunc))
     O = U_trunc @ Sigma_sqrt
 
-    # Step 6: State matrix via block-shift property  A = O1^+ @ O2
+    # Step 6: State matrix via block-shift property
+    # The observability shift equation is:  O2 = O1 @ A
+    # Therefore:  A = pinv(O1) @ O2   (shape: n_keep x n_keep)
     O1 = O[:-n_sensors, :]
     O2 = O[n_sensors:, :]
 
     try:
-        A = O2 @ np.linalg.pinv(O1)
+        A = np.linalg.pinv(O1) @ O2
     except np.linalg.LinAlgError:
-        A = np.linalg.lstsq(O1.T, O2.T, rcond=None)[0].T
+        A = np.linalg.lstsq(O1, O2, rcond=None)[0]
 
     # Step 7: Eigendecomposition
     eigenvalues, eigenvectors = eig(A)
