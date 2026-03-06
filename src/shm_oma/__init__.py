@@ -20,6 +20,10 @@ from .ssicov import (
     compute_autocorrelation,
     build_toeplitz_matrix,
     extract_stable_poles,
+    compute_psd,
+    plot_stabilization_diagram,
+    plot_psd_with_peaks,
+    plot_singular_values,
 )
 
 from .automation import (
@@ -42,6 +46,10 @@ __all__ = [
     "compute_autocorrelation",
     "build_toeplitz_matrix",
     "extract_stable_poles",
+    "compute_psd",
+    "plot_stabilization_diagram",
+    "plot_psd_with_peaks",
+    "plot_singular_values",
     
     # Automation functions
     "automate_poles_dbscan",

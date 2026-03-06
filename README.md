@@ -15,6 +15,11 @@ A professional Python library for automated modal parameter identification using
   - Agglomerative (hierarchical) clustering with configurable linkage
 - **Frequency Tracking**: Continuous monitoring of modal parameters over time with automatic mode matching
 - **SHM Analysis Tools**: Statistical trend analysis and anomaly detection
+- **Advanced Visualization & Diagnostics**:
+  - **Stabilization Diagram**: Shows mode stability across different model orders (identifies physical vs noise poles)
+  - **Power Spectral Density (PSD)**: Welch method for robust frequency domain analysis with identified peaks overlay
+  - **Singular Value Analysis**: SVD energy distribution with knee point detection for optimal model order selection
+  - **Modal Shapes Visualization**: Graphical representation of identified mode shapes
 
 ## Installation
 
@@ -158,13 +163,70 @@ for mode_id in [1, 2, 3]:
     print(f"  Frequency trend: {trend['slope']:.6f} Hz/sec (R²={trend['r_squared']:.4f})")
 ```
 
+### Example 4: Model Order Selection with Stabilization Diagram
+
+```python
+from shm_oma import plot_stabilization_diagram, plot_singular_values, perform_ssi_cov
+import matplotlib.pyplot as plt
+
+# Generate stabilization diagram to select optimal model order
+fig, ax = plot_stabilization_diagram(
+    acceleration_data,
+    order_range=range(10, 51, 2),  # Test orders 10, 12, 14, ..., 50
+    sampling_freq=100.0,
+    figsize=(14, 8)
+)
+plt.savefig('stabilization_diagram.png')
+plt.show()
+
+# Visualize singular values to identify energy distribution
+freqs, damps, modes, singular_values = perform_ssi_cov(
+    acceleration_data, order=40, sampling_freq=100.0
+)
+
+fig, ax = plot_singular_values(singular_values)
+plt.savefig('singular_values.png')
+plt.show()
+```
+
+### Example 5: PSD Analysis with Identified Peaks
+
+```python
+from shm_oma import plot_psd_with_peaks, compute_psd
+
+# Plot Power Spectral Density with identified natural frequencies marked
+fig, axes = plot_psd_with_peaks(
+    acceleration_data,
+    sampling_freq=100.0,
+    frequencies=freqs[:5],  # Mark first 5 identified modes
+    figsize=(14, 8)
+)
+plt.savefig('psd_analysis.png')
+plt.show()
+
+# Can also compute PSD separately for custom analysis
+frequencies, psd = compute_psd(
+    acceleration_data,
+    sampling_freq=100.0,
+    method='welch',
+    nperseg=512
+)
+
+print(f"PSD shape: {psd.shape}")
+print(f"Frequency resolution: {frequencies[1] - frequencies[0]:.3f} Hz")
+```
+
 ## Module Architecture
 
 ### `ssicov.py` - Core Algorithm
-- `perform_ssi_cov()`: Main SSI-COV implementation
-- `compute_autocorrelation()`: Autocorrelation function computation
-- `build_toeplitz_matrix()`: Block-Toeplitz matrix assembly
+- `perform_ssi_cov()`: Main SSI-COV implementation with discrete-to-continuous eigenvalue conversion
+- `compute_autocorrelation()`: Autocorrelation function computation with detrending
+- `build_toeplitz_matrix()`: Block-Toeplitz matrix assembly from ACF
 - `extract_stable_poles()`: Filter poles across model orders
+- `compute_psd()`: Power Spectral Density using Welch or FFT methods
+- `plot_stabilization_diagram()`: Visualize mode stability across model orders
+- `plot_psd_with_peaks()`: Plot PSD with identified natural frequencies marked
+- `plot_singular_values()`: Show SVD energy distribution and knee point detection
 
 ### `automation.py` - Clustering & Automation
 - `mac()`: Modal Assurance Criterion calculation
